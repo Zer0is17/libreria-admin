@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import logo from './assets/logo-encabezado.svg'
+import Libros from './Libros.jsx'
 import {
   ErrorSesion,
   borrarPedido,
@@ -124,7 +125,7 @@ function Pedido({ pedido, onEstado, onBorrar, ocupado }) {
 }
 
 /* ---------- Panel ---------- */
-function Panel({ sesion, onSalir }) {
+function Pedidos({ onSalir }) {
   const [pedidos, setPedidos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [ocupado, setOcupado] = useState(false)
@@ -200,8 +201,69 @@ function Panel({ sesion, onSalir }) {
 
   return (
     <>
+      <div className="titulo-fila">
+        <h1>Pedidos</h1>
+        <button type="button" className="boton claro" onClick={cargar} disabled={cargando}>
+          {cargando ? 'Actualizando…' : 'Actualizar'}
+        </button>
+      </div>
+
+      <div className="filtros" role="group" aria-label="Filtrar por estado">
+        {['todos', ...ESTADOS].map((e) => (
+          <button key={e} type="button" className="filtro" aria-pressed={filtro === e} onClick={() => setFiltro(e)}>
+            {e === 'todos' ? 'Todos' : ETIQUETA[e]} <span className="cuenta">{conteo[e]}</span>
+          </button>
+        ))}
+      </div>
+
+      <input
+        className="buscar"
+        type="search"
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+        placeholder="Buscar por número, nombre o correo"
+        aria-label="Buscar pedidos por número, nombre o correo"
+      />
+
+      {error && <p className="error" role="alert">{error}</p>}
+
+      <p className="conteo" aria-live="polite">
+        {cargando && pedidos.length === 0
+          ? 'Cargando pedidos…'
+          : visibles.length === 0
+            ? pedidos.length === 0 ? 'Todavía no hay pedidos.' : 'No hay pedidos con ese filtro.'
+            : `${visibles.length} ${visibles.length === 1 ? 'pedido' : 'pedidos'}`}
+      </p>
+
+      <ul className="lista-pedidos">
+        {visibles.map((p) => (
+          <Pedido key={p.id} pedido={p} onEstado={cambiar} onBorrar={eliminar} ocupado={ocupado} />
+        ))}
+      </ul>
+    </>
+  )
+}
+
+function Panel({ sesion, onSalir }) {
+  const [vista, setVista] = useState('pedidos')
+
+  return (
+    <>
       <header className="cabecera">
         <img className="cabecera-logo" src={logo} alt="Librería Shakespeare" />
+        <nav className="pestanas" aria-label="Secciones del panel">
+          {[['pedidos', 'Pedidos'], ['libros', 'Libros']].map(([clave, texto]) => (
+            <button
+              key={clave}
+              type="button"
+              className="pestana"
+              aria-current={vista === clave ? 'page' : undefined}
+              onClick={() => setVista(clave)}
+            >
+              {texto}
+            </button>
+          ))}
+        </nav>
         <div className="cabecera-der">
           <span className="cabecera-usuario">{sesion.correo}</span>
           <button type="button" className="boton claro-oscuro" onClick={onSalir}>Cerrar sesión</button>
@@ -209,45 +271,7 @@ function Panel({ sesion, onSalir }) {
       </header>
 
       <main className="contenido">
-        <div className="titulo-fila">
-          <h1>Pedidos</h1>
-          <button type="button" className="boton claro" onClick={cargar} disabled={cargando}>
-            {cargando ? 'Actualizando…' : 'Actualizar'}
-          </button>
-        </div>
-
-        <div className="filtros" role="group" aria-label="Filtrar por estado">
-          {['todos', ...ESTADOS].map((e) => (
-            <button key={e} type="button" className="filtro" aria-pressed={filtro === e} onClick={() => setFiltro(e)}>
-              {e === 'todos' ? 'Todos' : ETIQUETA[e]} <span className="cuenta">{conteo[e]}</span>
-            </button>
-          ))}
-        </div>
-
-        <input
-          className="buscar"
-          type="search"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar por número, nombre o correo"
-          aria-label="Buscar pedidos por número, nombre o correo"
-        />
-
-        {error && <p className="error" role="alert">{error}</p>}
-
-        <p className="conteo" aria-live="polite">
-          {cargando && pedidos.length === 0
-            ? 'Cargando pedidos…'
-            : visibles.length === 0
-              ? pedidos.length === 0 ? 'Todavía no hay pedidos.' : 'No hay pedidos con ese filtro.'
-              : `${visibles.length} ${visibles.length === 1 ? 'pedido' : 'pedidos'}`}
-        </p>
-
-        <ul className="lista-pedidos">
-          {visibles.map((p) => (
-            <Pedido key={p.id} pedido={p} onEstado={cambiar} onBorrar={eliminar} ocupado={ocupado} />
-          ))}
-        </ul>
+        {vista === 'pedidos' ? <Pedidos onSalir={onSalir} /> : <Libros onSalir={onSalir} />}
       </main>
     </>
   )

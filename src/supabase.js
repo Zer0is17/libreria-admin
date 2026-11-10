@@ -108,7 +108,15 @@ async function api(ruta, opciones = {}, reintentar = true) {
     return api(ruta, opciones, false)
   }
   if (r.status === 401) throw new ErrorSesion()
-  if (!r.ok) throw new Error('No se pudo completar la operación (error ' + r.status + ').')
+  if (!r.ok) {
+    const err = new Error(
+      r.status === 409
+        ? 'Ya existe un registro con ese identificador.'
+        : 'No se pudo completar la operación (error ' + r.status + ').',
+    )
+    err.status = r.status
+    throw err
+  }
   return r
 }
 
@@ -127,4 +135,43 @@ export async function cambiarEstado(id, estado) {
 
 export async function borrarPedido(id) {
   await api(`pedidos?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+/* ---------- Libros ---------- */
+export async function listarLibros() {
+  const r = await api('libros?select=*&order=orden.asc,creado.asc')
+  return r.json()
+}
+
+export async function crearLibro(libro) {
+  await api('libros', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(libro) })
+}
+
+export async function actualizarLibro(id, cambios) {
+  await api(`libros?id=eq.${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify(cambios),
+  })
+}
+
+export async function borrarLibro(id) {
+  await api(`libros?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+/* Sube una portada al almacenamiento y devuelve su dirección pública */
+export async function subirPortada(archivo, id) {
+  let sesion = sesionActual()
+  if (!sesion) throw new ErrorSesion()
+  if (sesion.expira - 60000 < Date.now()) sesion = await renovarSesion()
+  const extension = archivo.type === 'image/png' ? 'png' : archivo.type === 'image/webp' ? 'webp' : 'jpg'
+  const ruta = `${id}-${Date.now()}.${extension}`
+  const r = await fetch(`${SUPABASE_URL}/storage/v1/object/portadas/${ruta}`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${sesion.access_token}`, 'Content-Type': archivo.type },
+    body: archivo,
+  })
+  if (r.status === 401) throw new ErrorSesion()
+  if (!r.ok) throw new Error('No se pudo subir la portada (error ' + r.status + ').')
+  return `${SUPABASE_URL}/storage/v1/object/public/portadas/${ruta}`
 }

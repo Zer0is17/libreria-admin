@@ -149,3 +149,95 @@ code { background: var(--crema); border-radius: 6px; padding: .1rem .4rem; }
   .cabecera { justify-content: center; text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---------- Pestañas ---------- */
+.pestanas { display: flex; gap: .25rem; }
+.pestana {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--crema-clara);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  padding: .4rem 1.1rem;
+  cursor: pointer;
+  transition: background .25s;
+}
+.pestana:hover, .pestana[aria-current="page"] { background: rgba(255, 255, 255, .22); }
+.pestana:focus-visible { outline-color: var(--crema-clara); }
+
+/* ---------- Libros ---------- */
+.lista-libros { list-style: none; display: flex; flex-direction: column; gap: .8rem; }
+.libro-fila {
+  background: var(--tarjeta);
+  border-radius: 16px;
+  box-shadow: var(--sombra);
+  padding: .9rem 1.1rem;
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+.libro-fila.oculto { opacity: .7; }
+.miniatura, .portada-vista {
+  background: var(--claro);
+  color: var(--salvia-profundo);
+  border-radius: 6px 10px 10px 6px;
+  overflow: hidden;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: .7rem;
+}
+.miniatura img, .portada-vista img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.libro-info { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.libro-info strong { font-family: var(--titulo); font-size: 1.1rem; overflow-wrap: anywhere; }
+.libro-info span { color: var(--texto-suave); }
+.libro-precio { font-weight: 600; }
+.chips-mini { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .25rem; }
+.etiqueta { font-size: .8rem; padding: .1rem .65rem; border-radius: 999px; background: var(--claro); color: var(--salvia-profundo); }
+.oculto-etiqueta { background: transparent; border: 1px solid var(--salvia-oscuro); }
+.libro-acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; align-items: center; }
+.libro-acciones .boton { padding: .4rem 1rem; font-size: .95rem; }
+.orden { display: flex; gap: .25rem; }
+.orden button {
+  width: 2rem; height: 2rem; border-radius: 50%; border: 0;
+  background: var(--salvia-oscuro); color: var(--crema-clara); font-size: 1rem; cursor: pointer;
+}
+.orden button:hover { background: var(--salvia-profundo); }
+.orden button[disabled] { opacity: .4; cursor: not-allowed; }
+
+/* ---------- Formulario de libro ---------- */
+.form-libro { background: var(--tarjeta); border-radius: 20px; box-shadow: var(--sombra); padding: 1.5rem; }
+.form-libro h2 { font-family: var(--titulo); font-weight: 500; font-size: 1.7rem; margin-bottom: 1.2rem; }
+.form-libro-cols { display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; }
+.form-libro-portada { display: flex; flex-direction: column; gap: .6rem; align-items: center; }
+.portada-vista { width: 100%; font-size: .9rem; }
+.archivo { position: relative; display: inline-block; text-align: center; }
+.archivo input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.archivo:focus-within { outline: 3px solid var(--salvia-profundo); outline-offset: 2px; }
+.ayuda { font-size: .85rem; color: var(--texto-suave); }
+.form-libro-campos { display: flex; flex-direction: column; gap: 1rem; }
+.form-libro-campos label { display: flex; flex-direction: column; gap: .35rem; font-weight: 500; }
+.form-libro textarea {
+  font-family: var(--serif); font-size: 1rem; color: var(--texto); background: var(--crema-clara);
+  border: 1px solid var(--salvia); border-radius: 12px; padding: .6rem .85rem; width: 100%; resize: vertical;
+}
+.categorias-campo { border: 0; display: flex; flex-direction: column; gap: .6rem; }
+.categorias-campo legend { font-weight: 500; margin-bottom: .4rem; }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.nueva-categoria { display: flex; gap: .5rem; }
+.nueva-categoria input { flex: 1; min-width: 0; }
+.form-libro .casilla { flex-direction: row; align-items: center; gap: .6rem; }
+.form-libro .casilla input { width: auto; }
+.form-libro-acciones { display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.25rem; }
+
+@media (max-width: 640px) {
+  .libro-fila { grid-template-columns: 56px 1fr; }
+  .libro-acciones { grid-column: 1 / -1; justify-content: flex-start; }
+  .form-libro-cols { grid-template-columns: 1fr; }
+  .form-libro-portada { max-width: 220px; margin: 0 auto; }
+  .pestanas { order: 3; width: 100%; justify-content: center; }
+}
