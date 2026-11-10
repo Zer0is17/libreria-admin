@@ -1,0 +1,35 @@
+:root {
+  /* Paleta azul: #F0F3FA #D5DEEF #B1C9EF #8AAEE0 #628ECB #395886 */
+  --crema: #d5deef;
+  --crema-clara: #f0f3fa;
+  --tarjeta: #f0f3fa;
+  --claro: #b1c9ef;
+  --celeste: #8aaee0;
+  --salvia: #628ecb;
+  --salvia-oscuro: #395886;
+  --salvia-profundo: #2b4468; /* variante más oscura de #395886 para hover y foco */
+  --texto: #2b4468;
+  --texto-suave: #395886;
+  --sombra: 0 6px 18px rgba(57, 88, 134, .18);
+  --serif: "Lora", Georgia, "Times New Roman", serif;
+  --titulo: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--serif);
+  color: var(--texto);
+  background: var(--crema);
+  min-height: 100vh;
+}
+
+#root { min-height: 100vh; display: flex; flex-direction: column; }
+
+a { color: inherit; }
+
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--salvia-profundo);
+  outline-offset: 2px;
+}
