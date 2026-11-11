@@ -3,6 +3,7 @@ import logo from './assets/logo-encabezado.svg'
 import Libros from './Libros.jsx'
 import {
   ErrorSesion,
+  actualizarEnvio,
   borrarPedido,
   cambiarEstado,
   cerrarSesion,
@@ -62,8 +63,71 @@ function Login({ onEntrar }) {
   )
 }
 
+/* ---------- Datos de envío (lo que ve el cliente en "Seguimiento") ---------- */
+function FormEnvio({ pedido, onGuardar, ocupado }) {
+  const [origen, setOrigen] = useState(pedido.origen || '')
+  const [guia, setGuia] = useState(pedido.guia || '')
+  const [enlace, setEnlace] = useState(pedido.seguimiento_url || '')
+  const [problema, setProblema] = useState('')
+  const [guardado, setGuardado] = useState(false)
+  const lista = `origenes-${pedido.id}`
+
+  async function enviar(e) {
+    e.preventDefault()
+    setProblema('')
+    setGuardado(false)
+    const url = enlace.trim()
+    if (url && !/^https?:\/\//i.test(url)) {
+      setProblema('El enlace debe empezar con http:// o https://')
+      return
+    }
+    const ok = await onGuardar(pedido, {
+      origen: origen.trim() || null,
+      guia: guia.trim() || null,
+      seguimiento_url: url || null,
+    })
+    setGuardado(ok)
+  }
+
+  return (
+    <form className="envio" onSubmit={enviar}>
+      <h3>Envío y seguimiento</h3>
+      <p className="ayuda">Esto es lo que el cliente ve cuando escribe su folio en la tienda.</p>
+      <div className="envio-campos">
+        <label>
+          Procedencia (de dónde viene)
+          <input
+            value={origen}
+            onChange={(e) => setOrigen(e.target.value)}
+            list={lista}
+            placeholder="Amazon, Mercado Libre…"
+            maxLength={60}
+          />
+          <datalist id={lista}>
+            <option value="Amazon" />
+            <option value="Mercado Libre" />
+          </datalist>
+        </label>
+        <label>
+          Número de guía (opcional)
+          <input value={guia} onChange={(e) => setGuia(e.target.value)} maxLength={80} />
+        </label>
+        <label>
+          Enlace de rastreo (opcional)
+          <input type="url" value={enlace} onChange={(e) => setEnlace(e.target.value)} placeholder="https://…" maxLength={500} />
+        </label>
+      </div>
+      {problema && <p className="error" role="alert">{problema}</p>}
+      <div className="envio-acciones">
+        <button type="submit" className="boton" disabled={ocupado}>Guardar envío</button>
+        {guardado && <span className="guardado" role="status">Guardado ✓</span>}
+      </div>
+    </form>
+  )
+}
+
 /* ---------- Un pedido ---------- */
-function Pedido({ pedido, onEstado, onBorrar, ocupado }) {
+function Pedido({ pedido, onEstado, onEnvio, onBorrar, ocupado }) {
   const libros = Array.isArray(pedido.libros) ? pedido.libros : []
   return (
     <li className="pedido">
@@ -104,6 +168,8 @@ function Pedido({ pedido, onEstado, onBorrar, ocupado }) {
               </ul>
             </section>
           </div>
+
+          <FormEnvio pedido={pedido} onGuardar={onEnvio} ocupado={ocupado} />
 
           <div className="pedido-acciones">
             <label>
@@ -166,6 +232,20 @@ function Pedidos({ onSalir }) {
       setPedidos((lista) => lista.map((p) => (p.id === pedido.id ? { ...p, estado } : p)))
     } catch (err) {
       manejar(err)
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  async function guardarEnvio(pedido, datos) {
+    setOcupado(true)
+    try {
+      await actualizarEnvio(pedido.id, datos)
+      setPedidos((lista) => lista.map((p) => (p.id === pedido.id ? { ...p, ...datos } : p)))
+      return true
+    } catch (err) {
+      manejar(err)
+      return false
     } finally {
       setOcupado(false)
     }
@@ -237,7 +317,7 @@ function Pedidos({ onSalir }) {
 
       <ul className="lista-pedidos">
         {visibles.map((p) => (
-          <Pedido key={p.id} pedido={p} onEstado={cambiar} onBorrar={eliminar} ocupado={ocupado} />
+          <Pedido key={p.id} pedido={p} onEstado={cambiar} onEnvio={guardarEnvio} onBorrar={eliminar} ocupado={ocupado} />
         ))}
       </ul>
     </>

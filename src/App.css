@@ -241,3 +241,12 @@ code { background: var(--crema); border-radius: 6px; padding: .1rem .4rem; }
   .form-libro-portada { max-width: 220px; margin: 0 auto; }
   .pestanas { order: 3; width: 100%; justify-content: center; }
 }
+
+/* ---------- Envío y seguimiento (pedido) ---------- */
+.envio { background: var(--crema); border-radius: 14px; padding: .9rem 1.1rem; margin-top: 1rem; }
+.envio h3 { font-family: var(--titulo); font-weight: 600; font-size: 1.05rem; margin-bottom: .2rem; }
+.envio-campos { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin-top: .6rem; }
+.envio-campos label { display: flex; flex-direction: column; gap: .3rem; font-weight: 500; font-size: .95rem; }
+.envio-acciones { display: flex; align-items: center; gap: 1rem; margin-top: .8rem; }
+.guardado { color: var(--texto-suave); font-weight: 600; }
+@media (max-width: 760px) { .envio-campos { grid-template-columns: 1fr; } }

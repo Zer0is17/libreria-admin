@@ -133,6 +133,14 @@ export async function cambiarEstado(id, estado) {
   })
 }
 
+export async function actualizarEnvio(id, datos) {
+  await api(`pedidos?id=eq.${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify(datos),
+  })
+}
+
 export async function borrarPedido(id) {
   await api(`pedidos?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' })
 }
