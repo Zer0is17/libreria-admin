@@ -250,3 +250,13 @@ code { background: var(--crema); border-radius: 6px; padding: .1rem .4rem; }
 .envio-acciones { display: flex; align-items: center; gap: 1rem; margin-top: .8rem; }
 .guardado { color: var(--texto-suave); font-weight: 600; }
 @media (max-width: 760px) { .envio-campos { grid-template-columns: 1fr; } }
+
+/* ---------- Cancelación de pedidos ---------- */
+.cancelacion { background: var(--crema); border-radius: 14px; padding: .9rem 1.1rem; margin-top: 1rem; }
+.cancelacion h3 { font-family: var(--titulo); font-weight: 600; font-size: 1.05rem; margin-bottom: .5rem; }
+.cancelacion label { display: flex; flex-direction: column; gap: .35rem; font-weight: 500; }
+.cancelacion textarea {
+  font-family: var(--serif); font-size: 1rem; color: var(--texto); background: var(--crema-clara);
+  border: 1px solid var(--salvia); border-radius: 12px; padding: .6rem .85rem; width: 100%; resize: vertical;
+}
+.motivo-cancelacion { background: var(--crema); border-radius: 14px; padding: .8rem 1.1rem; margin-top: 1rem; line-height: 1.55; overflow-wrap: anywhere; }

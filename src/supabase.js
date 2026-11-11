@@ -125,11 +125,12 @@ export async function listarPedidos() {
   return r.json()
 }
 
-export async function cambiarEstado(id, estado) {
+export async function cambiarEstado(id, estado, motivo = null) {
   await api(`pedidos?id=eq.${encodeURIComponent(id)}`, {
     method: 'PATCH',
     headers: { Prefer: 'return=minimal' },
-    body: JSON.stringify({ estado }),
+    // el motivo solo se guarda en pedidos cancelados; en cualquier otro estado se borra
+    body: JSON.stringify({ estado, motivo_cancelacion: estado === 'cancelado' ? motivo : null }),
   })
 }
 

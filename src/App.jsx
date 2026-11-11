@@ -129,6 +129,30 @@ function FormEnvio({ pedido, onGuardar, ocupado }) {
 /* ---------- Un pedido ---------- */
 function Pedido({ pedido, onEstado, onEnvio, onBorrar, ocupado }) {
   const libros = Array.isArray(pedido.libros) ? pedido.libros : []
+  const [cancelando, setCancelando] = useState(false)
+  const [motivo, setMotivo] = useState('')
+  const [falta, setFalta] = useState(false)
+
+  function elegirEstado(estado) {
+    if (estado === 'cancelado') {
+      setMotivo(pedido.motivo_cancelacion || '')
+      setFalta(false)
+      setCancelando(true) // pide el motivo antes de cancelar
+    } else {
+      onEstado(pedido, estado)
+    }
+  }
+
+  async function confirmarCancelacion(e) {
+    e.preventDefault()
+    const texto = motivo.trim()
+    if (texto.length < 3) {
+      setFalta(true)
+      return
+    }
+    const ok = await onEstado(pedido, 'cancelado', texto)
+    if (ok) setCancelando(false)
+  }
   return (
     <li className="pedido">
       <details>
@@ -171,10 +195,40 @@ function Pedido({ pedido, onEstado, onEnvio, onBorrar, ocupado }) {
 
           <FormEnvio pedido={pedido} onGuardar={onEnvio} ocupado={ocupado} />
 
+          {pedido.estado === 'cancelado' && pedido.motivo_cancelacion && !cancelando && (
+            <p className="motivo-cancelacion">
+              <strong>Motivo de la cancelación:</strong> {pedido.motivo_cancelacion}
+            </p>
+          )}
+
+          {cancelando && (
+            <form className="cancelacion" onSubmit={confirmarCancelacion}>
+              <h3>Cancelar pedido</h3>
+              <label>
+                Motivo de la cancelación (el cliente lo verá en su seguimiento)
+                <textarea
+                  value={motivo}
+                  onChange={(e) => setMotivo(e.target.value)}
+                  rows={3}
+                  maxLength={300}
+                  autoFocus
+                  aria-invalid={falta}
+                />
+              </label>
+              {falta && <p className="error" role="alert">Escribe el motivo de la cancelación.</p>}
+              <div className="envio-acciones">
+                <button type="submit" className="boton" disabled={ocupado}>Confirmar cancelación</button>
+                <button type="button" className="boton claro" disabled={ocupado} onClick={() => setCancelando(false)}>
+                  Volver
+                </button>
+              </div>
+            </form>
+          )}
+
           <div className="pedido-acciones">
             <label>
               Estado
-              <select value={pedido.estado} disabled={ocupado} onChange={(e) => onEstado(pedido, e.target.value)}>
+              <select value={pedido.estado} disabled={ocupado} onChange={(e) => elegirEstado(e.target.value)}>
                 {ESTADOS.map((e) => (
                   <option key={e} value={e}>{ETIQUETA[e]}</option>
                 ))}
@@ -225,13 +279,16 @@ function Pedidos({ onSalir }) {
     return () => clearInterval(t)
   }, [cargar])
 
-  async function cambiar(pedido, estado) {
+  async function cambiar(pedido, estado, motivo = null) {
     setOcupado(true)
     try {
-      await cambiarEstado(pedido.id, estado)
-      setPedidos((lista) => lista.map((p) => (p.id === pedido.id ? { ...p, estado } : p)))
+      await cambiarEstado(pedido.id, estado, motivo)
+      const motivo_cancelacion = estado === 'cancelado' ? motivo : null
+      setPedidos((lista) => lista.map((p) => (p.id === pedido.id ? { ...p, estado, motivo_cancelacion } : p)))
+      return true
     } catch (err) {
       manejar(err)
+      return false
     } finally {
       setOcupado(false)
     }
